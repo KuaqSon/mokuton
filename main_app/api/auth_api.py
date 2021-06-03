@@ -70,7 +70,8 @@ def login_api(request, input: LoginInput):
         raise errors.HttpError(status_code=401, message="Unauthorized")
 
 
-def register_user(password: str, first_name: str, last_name: str, email: str
+def register_user(
+    password: str, first_name: str, last_name: str, email: str
 ) -> Tuple[Optional[User], bool]:
     try:
         user = User.objects.create(
@@ -107,8 +108,7 @@ class RegistrationInput(Schema):
 
 
 class UserSchema(Schema):
-    first_name: str
-    last_name: str
+    full_name: str
     email: str
 
 
@@ -121,6 +121,43 @@ def register_api(request, input: RegistrationInput):
         return new_user
 
     raise errors.HttpError(status_code=409, message="Username already exists")
+
+
+class ResetPasswordInput(Schema):
+    email: str
+
+    @validator("email", allow_reuse=True)
+    def email_has_correct_format(cls, email):
+        try:
+            validate_email(email)
+            return email
+        except Exception:
+            raise errors.HttpError(status_code=409, message="Malformed email")
+
+
+@router.post("/password/reset", auth=None)
+def reset_password(request, input: ResetPasswordInput):
+    return f"Password reset instructions were sent to {input.email}"
+
+
+class PasswordChangeInput(Schema):
+    old_password: str
+    new_password: str
+
+
+@router.post("/password/change")
+def change_password(request, input: PasswordChangeInput):
+    user = authenticate(username=request.auth.email, password=input.old_password)
+    if user:
+        user.set_password(input.new_password)
+        user.save()
+        return True
+    raise errors.HttpError(status_code=400, message="Old password incorrect!")
+
+
+@router.get("/me", response=UserSchema)
+def me(request):
+    return request.auth
 
 
 class RefreshTokenInput(Schema):
