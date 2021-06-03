@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Tuple
-
+from django.core.validators import validate_email
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -16,20 +16,6 @@ ALGORITHM = "HS256"
 access_token_jwt_subject = "access"
 
 router = Router()
-
-
-class LoginInput(Schema):
-    username: str
-    password: str
-
-
-class RefreshTokenInput(Schema):
-    refresh_token: str
-
-
-class TokenResponse(Schema):
-    refresh_token: str
-    access_token: str
 
 
 class TokenPayload(Schema):
@@ -63,6 +49,16 @@ def authenticate_and_create_token(username: str, password: str) -> Tuple[Dict, b
     return None, False
 
 
+class TokenResponse(Schema):
+    refresh_token: str
+    access_token: str
+
+
+class LoginInput(Schema):
+    username: str
+    password: str
+
+
 @router.post("/login", response=TokenResponse, auth=None)
 def login_api(request, input: LoginInput):
     token, succeed = authenticate_and_create_token(
@@ -74,15 +70,70 @@ def login_api(request, input: LoginInput):
         raise errors.HttpError(status_code=401, message="Unauthorized")
 
 
+def register_user(password: str, first_name: str, last_name: str, email: str
+) -> Tuple[Optional[User], bool]:
+    try:
+        user = User.objects.create(
+            first_name=first_name, last_name=last_name, email=email
+        )
+
+        user.set_password(password)
+        user.save()
+
+        return user, True
+    except Exception as e:
+        return None, False
+
+
+class RegistrationInput(Schema):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+
+    @validator("email", allow_reuse=True)
+    def email_has_correct_format(cls, email):
+        try:
+            validate_email(email)
+            return email
+        except Exception:
+            raise errors.HttpError(status_code=409, message="Malformed email")
+
+    @validator("password", allow_reuse=True)
+    def password_has_minimum_length(cls, password):
+        if len(password) < 6:
+            raise errors.HttpError(status_code=409, message="Password too small")
+        return password
+
+
+class UserSchema(Schema):
+    first_name: str
+    last_name: str
+    email: str
+
+
+@router.post("/register", response=UserSchema, auth=None)
+def register_api(request, input: RegistrationInput):
+    new_user, succeed = register_user(**input.dict())
+    print(new_user)
+    print(succeed)
+    if succeed:
+        return new_user
+
+    raise errors.HttpError(status_code=409, message="Username already exists")
+
+
+class RefreshTokenInput(Schema):
+    refresh_token: str
+
+
 @router.post("/refresh-token", response=TokenResponse, auth=None)
 def refresh_token_api(request, input: RefreshTokenInput):
     try:
         token_obj = AuthToken.objects.get(key__iexact=input.refresh_token)
         return {
             "refresh_token": token_obj.key,
-            "access_token": create_access_token(
-                data={"user_id": token_obj.user.id}
-            )
+            "access_token": create_access_token(data={"user_id": token_obj.user.id}),
         }
     except AuthToken.DoesNotExist:
         raise errors.HttpError(status_code=401, message="Unauthorized")
