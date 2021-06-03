@@ -107,6 +107,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+JWT_SECRET_KEY = env("JWT_SECRET_KEY", default="JWT_SECRET_KEY")
+ACCESS_TOKEN_EXPIRE_MINUTES = env.int("ACCESS_TOKEN_EXPIRE_MINUTES", default=5)
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

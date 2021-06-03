@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from main_app.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema, errors
 from ninja.schema import validator
@@ -37,13 +37,9 @@ class TokenPayload(Schema):
     exp: int = None
 
 
-def create_access_token(*, data: dict, expires_delta: timedelta = None):
+def create_access_token(*, data: dict):
     to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire, "sub": access_token_jwt_subject})
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -51,7 +47,10 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
 
 def create_auth_token(user: User):
     token, _ = AuthToken.objects.get_or_create(user=user)
-    return {"refresh_token": token.key, "access_token": create_access_token(data=TokenPayload(user_id=user.id))}
+    return {
+        "refresh_token": token.key,
+        "access_token": create_access_token(data={"user_id": user.id}),
+    }
 
 
 def authenticate_and_create_token(username: str, password: str) -> Tuple[Dict, bool]:
@@ -64,20 +63,27 @@ def authenticate_and_create_token(username: str, password: str) -> Tuple[Dict, b
     return None, False
 
 
-@router.post("/login", response=TokenResponse)
-def login(request, input: LoginInput):
-    token, succeed = authenticate_and_create_token(username=input.username, password=input.password)
+@router.post("/login", response=TokenResponse, auth=None)
+def login_api(request, input: LoginInput):
+    token, succeed = authenticate_and_create_token(
+        username=input.username, password=input.password
+    )
     if succeed:
         return token
     else:
         raise errors.HttpError(status_code=401, message="Unauthorized")
 
 
-@router.post("/refresh-token", response=TokenResponse)
+@router.post("/refresh-token", response=TokenResponse, auth=None)
 def refresh_token_api(request, input: RefreshTokenInput):
     try:
         token_obj = AuthToken.objects.get(key__iexact=input.refresh_token)
-        return {"access_token": create_access_token(data=TokenPayload(user_id=token_obj.user.id))}
+        return {
+            "refresh_token": token_obj.key,
+            "access_token": create_access_token(
+                data={"user_id": token_obj.user.id}
+            )
+        }
     except AuthToken.DoesNotExist:
         raise errors.HttpError(status_code=401, message="Unauthorized")
     except AuthToken.MultipleObjectsReturned:
@@ -97,12 +103,9 @@ def get_time_from_int(value: int) -> datetime:
 class GlobalAuth(HttpBearer):
     def authenticate(self, request, token):
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM], do_time_check=False)
+            payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[ALGORITHM])
             token_data = TokenPayload(**payload)
-            now = datetime.now(timezone.utc)
-            exp = get_time_from_int(token_data.exp)
-            if now >= exp:
-                raise errors.HttpError(status_code=403, message="JWT Expired")
         except:  # noqa
             return None
+
         return get_object_or_404(User, id=token_data.user_id)
