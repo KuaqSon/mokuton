@@ -1,8 +1,6 @@
 from ninja import Form, NinjaAPI
 
-from main_app.api import users_router
-
-from .bearer_auth import GlobalAuth
+from main_app.api import GlobalAuth, users_router
 
 api = NinjaAPI(auth=GlobalAuth())
 
