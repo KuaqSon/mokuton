@@ -48,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
 
     is_active = models.BooleanField("active", default=True, help_text="Indicates whether the user can login")
-    is_staff = models.BooleanField(default=False, help_text="Indicates whether the user can acess this admin site")
+    is_staff = models.BooleanField(default=False, help_text="Indicates whether the user can access this admin site")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

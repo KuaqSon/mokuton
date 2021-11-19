@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Tuple
-from django.core.validators import validate_email
+
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
-from main_app.models import User
+from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema, errors
 from ninja.schema import validator
 from ninja.security import HttpBearer
 
-from main_app.models import AuthToken
+from main_app.models import AuthToken, User
 
 ALGORITHM = "HS256"
 access_token_jwt_subject = "access"
@@ -61,22 +61,16 @@ class LoginInput(Schema):
 
 @router.post("/login", response=TokenResponse, auth=None)
 def login_api(request, input: LoginInput):
-    token, succeed = authenticate_and_create_token(
-        username=input.username, password=input.password
-    )
+    token, succeed = authenticate_and_create_token(username=input.username, password=input.password)
     if succeed:
         return token
     else:
         raise errors.HttpError(status_code=401, message="Unauthorized")
 
 
-def register_user(
-    password: str, first_name: str, last_name: str, email: str
-) -> Tuple[Optional[User], bool]:
+def register_user(password: str, first_name: str, last_name: str, email: str) -> Tuple[Optional[User], bool]:
     try:
-        user = User.objects.create(
-            first_name=first_name, last_name=last_name, email=email
-        )
+        user = User.objects.create(first_name=first_name, last_name=last_name, email=email)
 
         user.set_password(password)
         user.save()
