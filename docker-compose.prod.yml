@@ -13,15 +13,23 @@ services:
       - "8000:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - djangonetwork
 
-  nginx:
-    build: ./nginx
-    volumes:
-      - static:/static
-    ports:
-      - "80:80"
-    depends_on:
-      - django_gunicorn
+  # nginx:
+  #   build: ./nginx
+  #   volumes:
+  #     - static:/static
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - django_gunicorn
+  #   networks:
+  #     - djangonetwork
 
 volumes:
   static:
+
+networks:
+  djangonetwork:
+    driver: bridge

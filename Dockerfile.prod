@@ -9,7 +9,7 @@ RUN apk update \
     && apk add postgresql-dev \
     gcc python3-dev musl-dev jpeg-dev \
     zlib-dev libffi-dev cairo-dev pango-dev \
-    gdk-pixbuf-dev openssl-dev cargo rust
+    gdk-pixbuf-dev openssl-dev cargo rust bash
 
 RUN pip install --upgrade pip
 
