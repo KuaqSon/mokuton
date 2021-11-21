@@ -15,6 +15,8 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - djangonetwork
+    depends_on:
+      - redis
 
   # nginx:
   #   build: ./nginx
@@ -26,6 +28,15 @@ services:
   #     - django_gunicorn
   #   networks:
   #     - djangonetwork
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    stdin_open: true
+    tty: true
+    networks:
+      - djangonetwork
 
 volumes:
   static:

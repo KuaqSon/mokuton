@@ -13,6 +13,7 @@ Another starter template with **Django**
 /
 django-ninja</a>**
 - **Very basic account authentication kit**: Forget about the initial steps from the login / registration and start racing business.
+- **Preconfigured [Huey](https://github.com/coleifer/huey)**: A little task queue for python
 
 ## Installation
 
@@ -50,3 +51,10 @@ Now go to <a href="http://127.0.0.1:8000/api/docs" target="_blank">http://127.0.
 
 You will see the automatic interactive API documentation (provided by <a href="https://github.com/swagger-api/swagger-ui" target="_blank">Swagger UI</a>):
 
+### Huey task queue
+
+In one terminal, run:
+
+```
+python manage.py run_huey
+```

@@ -7,11 +7,11 @@ ENV PYTHONUNBUFFERED 1
 # install psycopg2 dependencies
 RUN apk update \
     && apk add postgresql-dev \
-    gcc python3-dev musl-dev jpeg-dev \
+    gcc g++ python3-dev py3-setuptools musl-dev jpeg-dev \
     zlib-dev libffi-dev cairo-dev pango-dev \
-    gdk-pixbuf-dev openssl-dev cargo rust bash
+    gdk-pixbuf-dev openssl-dev cargo rust bash make
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip setuptools wheel
 
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
