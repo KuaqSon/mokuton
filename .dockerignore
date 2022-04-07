@@ -1,0 +1,17 @@
+.git
+.gitignore
+
+Dockerfile
+
+.DS_Store
+README.md
+
+
+build/
+
+web-app/
+
+static/
+media/
+media_volume/
+staticfiles/

@@ -10,8 +10,8 @@ Another starter template with **Django**
 
 - **RESTful API**: This template is for design purposes and rapid deployment based on the power from Django.
 - **Django Ninja**: Very high performance web framework for building APIs. Thanks to **<a href="https://github.com/vitalik/django-ninja" target="_blank">vitalik
-/
-django-ninja</a>**
+  /
+  django-ninja</a>**
 - **Very basic account authentication kit**: Forget about the initial steps from the login / registration and start racing business.
 - **Preconfigured [Huey](https://github.com/coleifer/huey)**: A little task queue for python
 
@@ -20,8 +20,6 @@ django-ninja</a>**
 ```
 pip install -r requirements.txt
 ```
-
-
 
 ## Usage
 
@@ -57,4 +55,33 @@ In one terminal, run:
 
 ```
 python manage.py run_huey
+```
+
+## Deployment
+
+Make sure there's `.env.prod` file existed with the right environment variables.
+Should clone template from `.env.prod-sample`
+
+### Build docker image
+
+```sh
+docker-compose -f docker-compose.prod.yml build
+```
+
+### Running docker image in detached mode
+
+```sh
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Access server container bash
+
+```sh
+docker exec -it <django-container-id> /bin/bash
+```
+
+### Access live django shell
+
+```sh
+docker exec -it <django-container-id> python manage.py shell
 ```
