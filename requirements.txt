@@ -10,6 +10,7 @@ cryptography==3.4.7
 decorator==5.1.1
 Deprecated==1.2.13
 Django==3.2.3
+django-cors-headers==3.11.0
 django-environ==0.4.5
 django-ninja==0.16.1
 django-stubs==1.9.0
