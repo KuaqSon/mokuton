@@ -20,5 +20,5 @@ COPY . /app
 
 WORKDIR /app
 
-COPY ./entrypoint.sh /
-ENTRYPOINT ["sh", "/entrypoint.sh"]
+RUN chmod +x /app/docker/django/entrypoint.sh
+RUN chmod +x /app/docker/huey/entrypoint.sh
