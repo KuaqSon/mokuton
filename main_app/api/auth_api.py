@@ -68,9 +68,9 @@ def login_api(request, input: LoginInput):
         raise errors.HttpError(status_code=401, message="Unauthorized")
 
 
-def register_user(password: str, first_name: str, last_name: str, email: str) -> Tuple[Optional[User], bool]:
+def register_user(password: str, name: str, email: str) -> Tuple[Optional[User], bool]:
     try:
-        user = User.objects.create(first_name=first_name, last_name=last_name, email=email)
+        user = User.objects.create(name=name, email=email)
 
         user.set_password(password)
         user.save()
@@ -81,8 +81,7 @@ def register_user(password: str, first_name: str, last_name: str, email: str) ->
 
 
 class RegistrationInput(Schema):
-    first_name: str
-    last_name: str
+    name: str
     email: str
     password: str
 
@@ -102,7 +101,7 @@ class RegistrationInput(Schema):
 
 
 class UserSchema(Schema):
-    full_name: str
+    name: str
     email: str
 
 

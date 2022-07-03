@@ -22,6 +22,7 @@ ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path("mokuton")
 env.read_env(str(ROOT_DIR.path(".env")))
 
+MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(APPS_DIR, "media")
 
 

@@ -4,8 +4,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from nameparser import HumanName
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
@@ -26,10 +25,10 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password):
         """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
+        Creates and saves a superuser with the given email and password.
         """
         user = self.create_user(email, password)
+        user.name = "Super Admin"
         user.is_superuser = True
         user.is_admin = True
         user.is_staff = True
@@ -44,8 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=254, unique=True)
     USERNAME_FIELD = "email"
 
-    first_name = models.CharField(max_length=255, blank=True, null=True)
-    last_name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
 
     is_active = models.BooleanField("active", default=True, help_text="Indicates whether the user can login")
     is_staff = models.BooleanField(default=False, help_text="Indicates whether the user can access this admin site")
@@ -56,8 +54,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self):
-        return f"{self.first_name} ({self.email})"
-
-    @property
-    def full_name(self):
-        return "{} {}".format(self.first_name, self.last_name)
+        return f"#{self.id} - {self.email}"
