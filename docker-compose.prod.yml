@@ -16,6 +16,7 @@ services:
       - djangonetwork
     depends_on:
       - redis
+    restart: unless-stopped
     entrypoint: /app/docker/django/entrypoint.sh
 
   django_huey:
@@ -31,10 +32,12 @@ services:
     depends_on:
       - redis
       - django_gunicorn
+    restart: unless-stopped
     entrypoint: /app/docker/huey/entrypoint.sh
 
   nginx:
     build: ./nginx
+    restart: unless-stopped
     volumes:
       - ./media_volume:/app/mokuton/media
       - static_volume:/app/staticfiles
@@ -49,6 +52,7 @@ services:
     image: redis
     stdin_open: true
     tty: true
+    restart: unless-stopped
     networks:
       - djangonetwork
 
