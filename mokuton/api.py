@@ -6,8 +6,8 @@ from main_app.api import GlobalAuth, auth_router, users_router
 
 api = NinjaAPI(auth=GlobalAuth())
 
-api.add_router("/auth/", auth_router)
-api.add_router("/users/", users_router)
+api.add_router("/auth/", auth_router, tags=["auth"])
+api.add_router("/users/", users_router, tags=["users"])
 
 
 @api.get("/hello")
