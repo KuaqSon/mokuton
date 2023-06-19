@@ -16,7 +16,6 @@ class UserAdmin(admin.ModelAdmin):
     fields = (
         "name",
         "email",
-        "time_zone",
         "is_active",
         "is_staff",
         "is_superuser",
