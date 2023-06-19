@@ -68,6 +68,7 @@ AUTH_USER_MODEL = "main_app.User"
 # # =============
 # # CORS
 # # =============
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "Session",
@@ -95,7 +96,9 @@ WSGI_APPLICATION = "mokuton.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-DATABASES = {"default": env.db("DATABASE_URL", default=f"postgres://127.0.0.1:5432/mokuton")}
+DATABASES = {
+    "default": env.db("DATABASE_URL", default=f"postgres://127.0.0.1:5432/mokuton")
+}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql_psycopg2"
 DATABASES["default"]["NAME"] = env("DATABASE_NAME", default="mokuton")
